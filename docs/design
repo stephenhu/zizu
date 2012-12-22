@@ -1,0 +1,33 @@
+zizu is an opinionated static site generator based on bootstrap, haml, html5,
+and github.
+
+zizu can:
+
+1.  fork site skeleton (fork generic templates)
+2.  create repositories on github
+3.  generate static site files
+4.  push/pull sources to github
+5.  deploy to github pages
+
+x.  deploy to bitbucket
+x.  pull sources from local git
+x.  deploy to other hosts via sftp
+x.  run locally for development purposes
+
+repositories:
+
+1.  source (haml)
+2.  destination (html)
+
+commands:
+
+# creates remote repository and syncs
+zizu create NAME
+
+# converts haml to html
+zizu compile
+
+# push to remote repository
+zizu deploy REPOSITORY
+
+
