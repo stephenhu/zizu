@@ -1,32 +1,9 @@
 module Zizu
 
-  class Cli
+  class CLI < Thor
 
     REPOSITORY = "bootstrap-haml"
-    IGNORE     = [ "layout.haml", "navbar.haml", "footer.haml" ]
-
-    def login_github
-
-      if @github.nil?
-
-        @login     = ENV["ZIZU_GIT_LOGIN"] || nil
-        @password  = ENV["ZIZU_GIT_PASSWORD"] || nil
-
-        if @login.nil? or @password.nil?
-          puts "please set env variables"
-          exit
-        end
-
-        @github = Github.new( login:@login, password:@password )
-
-        if @github.nil?
-          puts "please set env variables"
-          exit
-        end
-
-      end
-
-    end
+    EXCLUDE    = [ "layout.haml", "navbar.haml", "footer.haml" ]
 
     #
     # zizu create NAME
@@ -34,6 +11,7 @@ module Zizu
     #   1.  fork skeleton repository from github
     #   2.  clone repository to local
     #
+    desc( "create NAME", "create site skeleton" )
     def create(name)
 
       if File.directory?(name)
@@ -73,9 +51,12 @@ module Zizu
             
     end
 
-    def compile(ignore=[])
+    desc( "compile", "compile .haml files to .html" )
+    method_option :exclude, :aliases => "-x",
+      :desc => "files to exclude, separate with comma for a list of files"
+    def compile(exclude)
 
-      puts ignore
+      puts exclude
 
       basedir = "."
 
@@ -85,10 +66,34 @@ module Zizu
 
     end
 
+    no_tasks do
+
+      def login_github                                                            
+                                                                                  
+        if @github.nil?                                                           
+  # TODO use github global config parameters                                             
+          @login     = ENV["ZIZU_GIT_LOGIN"] || nil                               
+          @password  = ENV["ZIZU_GIT_PASSWORD"] || nil                            
+                                                                                  
+          if @login.nil? or @password.nil?                                        
+            puts "please set env variables"                                       
+            exit                                                                  
+          end                                                                     
+                                                                                  
+          @github = Github.new( login:@login, password:@password )                
+                                                                                  
+          if @github.nil?                                                         
+            puts "please set env variables"                                       
+            exit                                                                  
+          end                                                                     
+                                                                                  
+        end                                                                       
+                                                                                  
+      end
+
+    end
+
   end
 
 end
-
-z = Zizu::Cli.new
-z.compile
 
