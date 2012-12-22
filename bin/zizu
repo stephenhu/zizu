@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
-require "thor/runner"
+require "zizu"
 Zizu::CLI.start
 
