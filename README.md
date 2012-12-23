@@ -28,3 +28,13 @@ and github.
 ```gem build zizu.gemspec # from the zizu root directory```
 4.  install the local gem
 ```gem install zizu-0.0.1.gem``` 
+
+## faq
+
+1.  what does zizu stand for?
+```zizu is the chinese pin yin for spider, technically it should be zhizhu,
+but that's a bit harder to type.```
+2.  are sinatra haml files compatible with zizu?
+```technically they should be since i've used sinatra quite a bit, i tried
+to keep the syntax consistent with sinatra.```
+
