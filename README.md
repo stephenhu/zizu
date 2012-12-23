@@ -23,8 +23,8 @@ and github.
 1.  clone the repository
 ```git clone git@github.com:stephenhu/zizu```
 2.  install dependencies
-```bundle install # from zizu directory```
+```bundle install # from the zizu root directory```
 3.  build the gem
-```gem build zizu.gemspec # from the zizu directory```
+```gem build zizu.gemspec # from the zizu root directory```
 4.  install the local gem
 ```gem install zizu-0.0.1.gem``` 
