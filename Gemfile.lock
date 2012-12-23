@@ -16,7 +16,6 @@ GEM
       oauth2
     haml (3.1.7)
     hashie (1.2.0)
-    highline (1.6.15)
     httpauth (0.2.0)
     jwt (0.1.5)
       multi_json (>= 1.0)
@@ -39,7 +38,6 @@ PLATFORMS
 DEPENDENCIES
   github_api
   haml
-  highline
   thor
   tilt
   zizu!
