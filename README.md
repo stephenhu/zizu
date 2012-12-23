@@ -35,6 +35,6 @@ and github.
 ```zizu is the chinese pin yin for spider, technically it should be zhizhu,
 but that's a bit harder to type.```
 2.  are sinatra haml files compatible with zizu?
-```technically they should be since i've used sinatra quite a bit, i tried
-to keep the syntax consistent with sinatra.```
+```technically i tried to keep the syntax consistent with sinatra since i'm
+a big fan, so i mocked _haml_ and _url_ functions.```
 
