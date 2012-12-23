@@ -3,7 +3,7 @@ module Zizu
   class CLI < Thor
 
     REPOSITORY = "bootstrap-haml"
-    EXCLUDE    = [ "layout.haml", "navbar.haml", "footer.haml" ]
+    EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
 
     #
     # zizu create NAME
@@ -36,37 +36,85 @@ module Zizu
           response = @github.repos.edit( @user, REPOSITORY, :name => name )
           @ssh_url = response[:git_url]
 
+          puts "bootstrap-haml repository forked:"
+          puts "#{@ssh_url}"
+
           r = %x[git clone #{@ssh_url} #{name}]
 
           puts r
 
         else
-          puts "fork failed, aborting"
+          puts "fork failed, aborting operation"
           exit
         end
 
       end
 
-      puts "creating directory #{name}..."
-            
     end
 
     desc( "compile", "compile .haml files to .html" )
-    method_option :exclude, :aliases => "-x",
-      :desc => "files to exclude, separate with comma for a list of files"
-    def compile(exclude)
+    method_option :exclude, :aliases => "-x", :type => :string,
+      :required => false, :desc => "files to exclude from compilation, " +
+      "use comma separate multiple files"
+    method_option :output, :aliases => "-o", :type => :string,
+      :required => false, :desc => "output path for compiled files"
+    def compile
 
-      puts exclude
-
+      excludes  = check_exclusions(options[:exclude])
+      dir       = create_directory(options[:output])
+        
       basedir = "."
 
       haml_files = Dir.glob("*.haml")
 
-      puts haml_files
+      haml_files.each do |f|
+
+        if excludes.include?(f)
+          next
+        else
+
+          init_templates
+          html = render(f)
+
+          f = File.open( dir + f.chomp(".haml") + ".html", "w" )
+          f.write(html)
+          f.close
+
+        end
+
+      end
 
     end
 
     no_tasks do
+
+      def check_exclusions(excludes_str)
+
+        if excludes_str.nil?
+          return EXCLUDES
+        else
+
+           user_excludes = excludes_str.split(",").each { |e| e.strip! }
+           user_excludes = user_excludes + EXCLUDES
+           user_excludes.uniq!
+           return user_excludes
+
+        end
+
+      end
+
+      def create_directory(name)
+        puts name
+        if name.nil?
+          return ""
+        else
+
+          Dir.mkdir(name) unless File.directory?(name)
+          return "#{name}/"
+
+        end
+                                                                            
+      end
 
       def login_github                                                            
                                                                                   
@@ -89,6 +137,22 @@ module Zizu
                                                                                   
         end                                                                       
                                                                                   
+      end
+
+      def init_templates
+
+        @layout = Tilt.new("layout.haml")
+        @navbar = Tilt.new("navbar.haml")
+        @footer = Tilt.new("footer.haml")
+
+      end
+
+      def render(template)
+
+        if !template.nil?
+          return @layout.render { Tilt.new(template).render }
+        end
+
       end
 
     end
