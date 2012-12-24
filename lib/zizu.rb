@@ -2,12 +2,15 @@
 require "github_api"
 require "haml"
 require "highline/import"
+require "rgit"
 require "thor"
 require "tilt"
 require "yaml"
 
-require File.join( File.dirname(__FILE__), "zizu", "cli" )
+require File.join( File.dirname(__FILE__), "zizu", "cmdline" )
+require File.join( File.dirname(__FILE__), "zizu", "githublib" )
 require File.join( File.dirname(__FILE__), "zizu", "version" )
+require File.join( File.dirname(__FILE__), "zizu", "cli" )
 
 def haml(file)
   return Tilt.new("#{file}.haml").render

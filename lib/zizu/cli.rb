@@ -2,6 +2,8 @@ module Zizu
 
   class CLI < Thor
 
+    include Zizu::CmdLine
+
     REPOSITORY = "bootstrap-haml"
     EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
 
@@ -15,37 +17,36 @@ module Zizu
     def create(name)
 
       if File.directory?(name)
-
-        puts "directory already exists, init aborted"
-        return
-
+        fatal("directory already exists, init aborted")
       else
 
         # fork github project
 
-        login_github
+        g = GithubLib.new    
 
-        # TODO check for existence
+        # TODO check for existence of this fork
         # TODO make atomic
-        response = @github.repos.forks.create( "stephenhu", REPOSITORY )
+        response = g.api.repos.forks.create( "stephenhu", REPOSITORY )
 
         @user     = response[:owner][:login]
 
         if response.success?
 
-          response = @github.repos.edit( @user, REPOSITORY, :name => name )
-          @ssh_url = response[:git_url]
+          response = g.api.repos.edit( @user, REPOSITORY, :name => name )
+          @git_url = response[:git_url]
 
-          puts "bootstrap-haml repository forked:"
-          puts "#{@ssh_url}"
+          success("bootstrap-haml repository forked: #{@git_url}")
 
-          r = %x[git clone #{@ssh_url} #{name}]
+          r = Rgit::Lib.clone( @git_url, name )
 
-          puts r
+          if r
+            success("repository cloned to local")
+          else
+            fatal("unable clone remote repository")
+          end
 
         else
-          puts "fork failed, aborting operation"
-          exit
+          fatal("fork failed, aborting operation")
         end
 
       end
@@ -104,7 +105,7 @@ module Zizu
       end
 
       def create_directory(name)
-        puts name
+
         if name.nil?
           return ""
         else
@@ -114,29 +115,6 @@ module Zizu
 
         end
                                                                             
-      end
-
-      def login_github                                                            
-                                                                                  
-        if @github.nil?                                                           
-  # TODO use github global config parameters                                             
-          @login     = ENV["ZIZU_GIT_LOGIN"] || nil                               
-          @password  = ENV["ZIZU_GIT_PASSWORD"] || nil                            
-                                                                                  
-          if @login.nil? or @password.nil?                                        
-            puts "please set env variables"                                       
-            exit                                                                  
-          end                                                                     
-                                                                                  
-          @github = Github.new( login:@login, password:@password )                
-                                                                                  
-          if @github.nil?                                                         
-            puts "please set env variables"                                       
-            exit                                                                  
-          end                                                                     
-                                                                                  
-        end                                                                       
-                                                                                  
       end
 
       def init_templates
@@ -149,9 +127,8 @@ module Zizu
 
       def render(template)
 
-        if !template.nil?
-          return @layout.render { Tilt.new(template).render }
-        end
+        return
+          @layout.render { Tilt.new(template).render } unless template.nil?
 
       end
 

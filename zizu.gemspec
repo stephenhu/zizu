@@ -20,5 +20,7 @@ Gem::Specification.new do |gem|
   #gem.executables     = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.executables     = %w(zizu)
 
+  #gem.add_dependency  "rgit"
+
 end
 
