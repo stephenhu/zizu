@@ -7,7 +7,6 @@ require "thor"
 require "tilt"
 require "yaml"
 
-require File.join( File.dirname(__FILE__), "zizu", "cmdline" )
 require File.join( File.dirname(__FILE__), "zizu", "githublib" )
 require File.join( File.dirname(__FILE__), "zizu", "version" )
 require File.join( File.dirname(__FILE__), "zizu", "cli" )

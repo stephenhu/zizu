@@ -2,8 +2,6 @@ module Zizu
 
   class CLI < Thor
 
-    include Zizu::CmdLine
-
     REPOSITORY = "bootstrap-haml"
     EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
 
@@ -130,6 +128,15 @@ module Zizu
         return
           @layout.render { Tilt.new(template).render } unless template.nil?
 
+      end
+
+      def success(msg)
+        puts msg.green
+      end
+
+      def fatal(msg)
+        puts msg.red
+        exit
       end
 
     end
