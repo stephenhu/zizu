@@ -22,15 +22,14 @@ module Zizu
 
         g = GithubLib.new    
 
-        # TODO check for existence of this fork
         # TODO make atomic
-        response = g.api.repos.forks.create( "stephenhu", REPOSITORY )
+        fatal("fork failed") unless g.fork( "stephenhu", REPOSITORY )
 
-        @user     = response[:owner][:login]
+        #@user = response[:owner][:login]
 
         if response.success?
 
-          response = g.api.repos.edit( @user, REPOSITORY, :name => name )
+          response = g.api.repos.edit( @login, REPOSITORY, :name => name )
           @git_url = response[:git_url]
 
           success("bootstrap-haml repository forked: #{@git_url}")

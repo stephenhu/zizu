@@ -5,9 +5,7 @@ module Zizu
     attr_accessor :api
 
     def initialize
-
       login
-
     end
 
 
@@ -25,7 +23,36 @@ module Zizu
 
         @api = Github.new( login:@login, password:@password )
                                                                                   
-        CmdLine.fatal("unable to login") if @api.nil?                           
+        puts("login failed") if @api.nil?                           
+
+      end
+
+    end
+
+    def fork( user, repo )
+
+      unless fork_exists?("#{user}/#{repo}")
+
+        response = @api.repos.forks.create( user, repo )
+
+        return true if response.succeed?
+
+      end
+
+      return false
+
+    end
+
+    def fork_exists?(full_name)
+
+      response = @api.repos.list( :user => @login )
+
+      response.each do |r|
+
+        user, repo = r[:full_name].split("/")
+        get_r = @api.repos.get( user, repo )
+
+        return true if get_r[:parent][:full_name] == full_name
 
       end
 
