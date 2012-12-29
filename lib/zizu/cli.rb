@@ -5,13 +5,7 @@ module Zizu
     REPOSITORY = "bootstrap-haml"
     EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
 
-    #
-    # zizu create NAME
-    #
-    #   1.  fork skeleton repository from github
-    #   2.  clone repository to local
-    #
-    desc( "create NAME", "create site skeleton" )
+    desc( "create NAME", "creates site skeleton" )
     def create(name)
 
       if File.directory?(name)
