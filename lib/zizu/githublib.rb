@@ -18,7 +18,8 @@ module Zizu
           ask("git password: ") { |q| q.echo = "*" }
                                                                      
         if @login.nil? or @password.nil?
-          CmdLine.fatal("please set git config variable user.name")
+          puts "please set git config variable user.name".red
+          exit
         end
 
         @api = Github.new( login:@login, password:@password )
@@ -38,7 +39,10 @@ module Zizu
 
         response = @api.repos.forks.create( user, repo )
 
-        return true if response.success?
+        if response.success?
+          puts "repository forked to: #{response[:git_url]}".green
+          return true
+        end
 
       end
 
@@ -57,11 +61,9 @@ module Zizu
 
         if get_r.success?
 
-          if get_r[:parent][:full_name] == full_name
+          if get_r[:fork] and get_r[:parent][:full_name] == full_name
             puts "repository has already been forked: #{get_r[:git_url]}".red
             return true
-          else
-            return false
           end
 
         else
@@ -72,8 +74,25 @@ module Zizu
 
       end
 
+      return false
+
     end
 
+    def set_repository_name( repository, new_name )
+
+      response = @api.repos.edit( @login, repository, :name => new_name )
+
+      if response.success?
+        puts "Repository successfully renamed to #{name}".green
+        puts response[:git_url].green
+        return true
+      else
+        puts "GithubLib Error: #{response.status}".red
+        return false
+      end
+
+    end
+ 
   end
 
 end

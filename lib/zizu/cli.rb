@@ -2,6 +2,7 @@ module Zizu
 
   class CLI < Thor
 
+    USER       = "stephenhu"
     REPOSITORY = "bootstrap-haml"
     EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
 
@@ -17,23 +18,16 @@ module Zizu
         g = GithubLib.new    
 
         # TODO make atomic
-        fatal("fork failed") unless g.fork( "stephenhu", REPOSITORY )
+        if g.fork( USER, REPOSITORY )
 
-        #@user = response[:owner][:login]
+          if g.set_repository_name( REPOSITORY, name )
 
-        if response.success?
+            if Rgit::Lib.clone( @git_url, name )
+              success("repository cloned to local")
+            else
+              fatal("unable clone remote repository")
+            end
 
-          response = g.api.repos.edit( @login, REPOSITORY, :name => name )
-          @git_url = response[:git_url]
-
-          success("bootstrap-haml repository forked: #{@git_url}")
-
-          r = Rgit::Lib.clone( @git_url, name )
-
-          if r
-            success("repository cloned to local")
-          else
-            fatal("unable clone remote repository")
           end
 
         else
