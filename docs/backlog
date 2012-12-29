@@ -1,3 +1,4 @@
 - add rspec tests
 - prompt user on overwriting existing files
+- add in configuration file to ~/.zizu
 

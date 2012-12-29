@@ -17,13 +17,16 @@ module Zizu
         @password  = ENV["ZIZU_GIT_PASSWORD"] ||
           ask("git password: ") { |q| q.echo = "*" }
                                                                      
-        if @login.nil? or @password.nil?                                        
+        if @login.nil? or @password.nil?
           CmdLine.fatal("please set git config variable user.name")
         end
 
         @api = Github.new( login:@login, password:@password )
-                                                                                  
-        puts("login failed") if @api.nil?                           
+
+        if @api.nil?
+          puts "login failed".red
+          exit
+        end
 
       end
 
@@ -35,7 +38,7 @@ module Zizu
 
         response = @api.repos.forks.create( user, repo )
 
-        return true if response.succeed?
+        return true if response.success?
 
       end
 
@@ -52,7 +55,20 @@ module Zizu
         user, repo = r[:full_name].split("/")
         get_r = @api.repos.get( user, repo )
 
-        return true if get_r[:parent][:full_name] == full_name
+        if get_r.success?
+
+          if get_r[:parent][:full_name] == full_name
+            puts "repository has already been forked: #{get_r[:git_url]}".red
+            return true
+          else
+            return false
+          end
+
+        else
+          puts "Error: #{get_r.status}".red
+          puts get_r.body.yellow
+          exit
+        end
 
       end
 
