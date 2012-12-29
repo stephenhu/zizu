@@ -78,6 +78,12 @@ module Zizu
 
     end
 
+    desc( "deploy", "deploy static files" )
+    method_option :github_pages
+    def deploy
+
+    end
+
     no_tasks do
 
       def check_exclusions(excludes_str)
