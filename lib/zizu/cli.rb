@@ -48,10 +48,12 @@ module Zizu
 
       excludes  = check_exclusions(options[:exclude])
       dir       = create_directory(options[:output])
-        
+
       basedir = "."
 
       haml_files = Dir.glob("*.haml")
+
+      init_templates
 
       haml_files.each do |f|
 
@@ -59,9 +61,8 @@ module Zizu
           next
         else
 
-          init_templates
-          html = render(f)
-
+          html = haml_to_html(f)
+          puts html
           f = File.open( dir + f.chomp(".haml") + ".html", "w" )
           f.write(html)
           f.close
@@ -110,16 +111,20 @@ module Zizu
 
       def init_templates
 
-        @layout = Tilt.new("layout.haml")
-        @navbar = Tilt.new("navbar.haml")
-        @footer = Tilt.new("footer.haml")
+        @layout = Tilt.new("layout.haml") if File.exists?("layout.haml")
+        @navbar = Tilt.new("navbar.haml") if File.exists?("navbar.haml")
+        @footer = Tilt.new("footer.haml") if File.exists?("footer.haml")
 
       end
 
-      def render(template)
+      def haml_to_html(template)
 
-        return
-          @layout.render { Tilt.new(template).render } unless template.nil?
+        unless @layout.nil?
+          html = @layout.render { Tilt.new(template).render }
+          return html
+        end
+
+        fatal("layout.haml template is missing, aborting compile")
 
       end
 
