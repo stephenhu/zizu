@@ -73,13 +73,28 @@ module Zizu
 
     end
 
+    desc( "stage", "deploy file locally" )
+    method_option :port, :port => "-p", :type => :numeric, :required => false,
+      :desc => "port number to serve pages"
+    def stage
+      configru = File.join( File.dirname(__FILE__), "config.ru" )
+      FileUtils.cp( configru, "." )
+      %x[rackup] 
+    end
+
     desc( "deploy", "deploy static files" )
-    method_option :github_pages
+    method_option :target, :aliases => "-t"
     def deploy
 
     end
 
     no_tasks do
+
+      def get_dependencies
+
+        # bootstrap
+
+      end
 
       def check_exclusions(excludes_str)
 
