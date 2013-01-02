@@ -10,23 +10,29 @@ module Zizu
 
 
     def login
-                                                                                  
+
+      config = Rgit::Lib.config
+
+      if Zizu::USER == config["user.name"]
+        Zizu::fatal("cannot fork a project you own, aborting")
+      end
+
       if @api.nil?                                                           
  
-        @login     = ENV["ZIZU_GIT_LOGIN"] || Rgit::Lib.config["user.email"]
+        @login     = ENV["ZIZU_GIT_LOGIN"] || config["user.email"]
         @password  = ENV["ZIZU_GIT_PASSWORD"] ||
           ask("git password: ") { |q| q.echo = "*" }
+        puts @login
+        puts @password
                                                                      
         if @login.nil? or @password.nil?
-          puts "please set git config variable user.name".red
-          exit
+          Zizu::fatal("please set git config variable user.name")
         end
 
         @api = Github.new( login:@login, password:@password )
 
         if @api.nil?
-          puts "login failed".red
-          exit
+          Zizu::fatal("login failed")
         end
 
       end
@@ -40,7 +46,7 @@ module Zizu
         response = @api.repos.forks.create( user, repo )
 
         if response.success?
-          puts "repository forked to: #{response[:git_url]}".green
+          Zizu::success("repository forked to: #{response[:git_url]}")
           return true
         end
 
@@ -62,14 +68,14 @@ module Zizu
         if get_r.success?
 
           if get_r[:fork] and get_r[:parent][:full_name] == full_name
-            puts "repository has already been forked: #{get_r[:git_url]}".red
+            Zizu::fatal(
+              "repository has already been forked: #{get_r[:git_url]}")
             return true
           end
 
         else
-          puts "Error: #{get_r.status}".red
-          puts get_r.body.yellow
-          exit
+          Zizu::fatal("Error: #{get_r.status}")
+          Zizu::fatal(get_r.body)
         end
 
       end
@@ -83,12 +89,11 @@ module Zizu
       response = @api.repos.edit( @login, repository, :name => new_name )
 
       if response.success?
-        puts "Repository successfully renamed to #{name}".green
-        puts response[:git_url].green
+        Zizu::success("Repository successfully renamed to #{name}")
+        Zizu::success(response[:git_url])
         return true
       else
-        puts "GithubLib Error: #{response.status}".red
-        return false
+        Zizu::fatal("GithubLib Error: #{response.status}")
       end
 
     end

@@ -22,5 +22,18 @@ end
 
 module Zizu
 
+  USER        = "stephenhu"
+  REPOSITORY  = "bootstrap-haml"
+  EXCLUDES    = [ "layout.haml", "navbar.haml", "footer.haml" ]
+
+  def self.fatal(msg)
+    puts msg.red
+    exit
+  end
+
+  def self.success(msg)
+    puts msg.green
+  end
+
 end
 

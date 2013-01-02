@@ -2,15 +2,15 @@ module Zizu
 
   class CLI < Thor
 
-    USER       = "stephenhu"
-    REPOSITORY = "bootstrap-haml"
-    EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
+    #USER       = "stephenhu"
+    #REPOSITORY = "bootstrap-haml"
+    #EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
 
     desc( "create NAME", "creates site skeleton" )
     def create(name)
 
       if File.directory?(name)
-        fatal("directory already exists, init aborted")
+        Zizu::fatal("directory already exists, init aborted")
       else
 
         # fork github project
@@ -18,20 +18,20 @@ module Zizu
         g = GithubLib.new    
 
         # TODO make atomic
-        if g.fork( USER, REPOSITORY )
+        if g.fork( Zizu::USER, Zizu::REPOSITORY )
 
           if g.set_repository_name( REPOSITORY, name )
 
             if Rgit::Lib.clone( @git_url, name )
-              success("repository cloned to local")
+              Zizu::success("repository cloned to local")
             else
-              fatal("unable clone remote repository")
+              Zizu::fatal("unable clone remote repository")
             end
 
           end
 
         else
-          fatal("fork failed, aborting operation")
+          Zizu::fatal("fork failed, aborting operation")
         end
 
       end
@@ -62,7 +62,7 @@ module Zizu
         else
 
           html = haml_to_html(f)
-          puts html
+
           f = File.open( dir + f.chomp(".haml") + ".html", "w" )
           f.write(html)
           f.close
@@ -77,9 +77,17 @@ module Zizu
     method_option :port, :port => "-p", :type => :numeric, :required => false,
       :desc => "port number to serve pages"
     def stage
+
       configru = File.join( File.dirname(__FILE__), "config.ru" )
       FileUtils.cp( configru, "." )
-      %x[rackup] 
+
+      port_option = options[:port].nil? ? "" : " -p #{options[:port]}"
+
+      #stdin, stdout, stderr = Open3.popen3("rackup" + port_option)
+
+      #puts stderr.read
+      #puts stdout.read
+
     end
 
     desc( "deploy", "deploy static files" )
@@ -139,17 +147,8 @@ module Zizu
           return html
         end
 
-        fatal("layout.haml template is missing, aborting compile")
+        Zizu::fatal("layout.haml template is missing, aborting compile")
 
-      end
-
-      def success(msg)
-        puts msg.green
-      end
-
-      def fatal(msg)
-        puts msg.red
-        exit
       end
 
     end
