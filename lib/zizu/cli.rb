@@ -2,11 +2,7 @@ module Zizu
 
   class CLI < Thor
 
-    #USER       = "stephenhu"
-    #REPOSITORY = "bootstrap-haml"
-    #EXCLUDES   = [ "layout.haml", "navbar.haml", "footer.haml" ]
-
-    desc( "create NAME", "creates site skeleton" )
+    desc( "create NAME", "create site skeleton" )
     def create(name)
 
       if File.directory?(name)
@@ -38,7 +34,7 @@ module Zizu
 
     end
 
-    desc( "compile", "compile .haml files to .html" )
+    desc( "compile", "compile template files to .html" )
     method_option :exclude, :aliases => "-x", :type => :string,
       :required => false, :desc => "files to exclude from compilation, " +
       "use comma separate multiple files"
@@ -73,30 +69,50 @@ module Zizu
 
     end
 
-    desc( "stage", "deploy file locally" )
-    method_option :port, :port => "-p", :type => :numeric, :required => false,
-      :desc => "port number to serve pages"
-    def stage
+    desc( "test", "deploy static files locally for testing")
+    def test
 
-      configru = File.join( File.dirname(__FILE__), "config.ru" )
-      FileUtils.cp( configru, "." )
+      get_rack
+      get_bootstrap
 
-      port_option = options[:port].nil? ? "" : " -p #{options[:port]}"
-
-      #stdin, stdout, stderr = Open3.popen3("rackup" + port_option)
-
-      #puts stderr.read
-      #puts stdout.read
+      Zizu::info("run the 'rackup' command to start the server locally")
 
     end
 
-    desc( "deploy", "deploy static files" )
+    desc( "deploy", "deploy static files to production" )
     method_option :target, :aliases => "-t"
     def deploy
 
     end
 
     no_tasks do
+
+      def get_rack
+
+        configru = File.join( File.dirname(__FILE__), "config.ru" )
+        FileUtils.cp( configru, "." ) unless File.exists?("./config.ru")
+
+        Zizu::success("rackup configuration (config.ru) installed")
+
+      end
+
+      def get_bootstrap
+
+        bootstrap = open(Zizu::BOOTSTRAP)
+
+        Zip::ZipFile.open(bootstrap.path) do |z|
+
+          z.each do |f|
+            path = File.join( ".", f.name )
+            FileUtils.mkdir_p(File.dirname(path))
+            z.extract( f, path ) unless File.exist?(path)
+          end
+
+        end
+
+        Zizu::success("bootstrap latest installed")
+
+      end
 
       def get_dependencies
 
