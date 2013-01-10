@@ -3,31 +3,18 @@ module Zizu
   class CLI < Thor
 
     desc( "create NAME", "create site skeleton" )
+    method_option :fork, :aliases => "-f", :type => :boolean,
+      :default => false, :required => false, :desc => "fork repo"
     def create(name)
 
       if File.directory?(name)
         Zizu::fatal("directory already exists, init aborted")
       else
 
-        # fork github project
-
-        g = GithubLib.new    
-
-        # TODO make atomic
-        if g.fork( Zizu::USER, Zizu::REPOSITORY )
-
-          if g.set_repository_name( REPOSITORY, name )
-
-            if Rgit::Lib.clone( @git_url, name )
-              Zizu::success("repository cloned to local")
-            else
-              Zizu::fatal("unable clone remote repository")
-            end
-
-          end
-
+        if options[:fork]
+          fork(name)
         else
-          Zizu::fatal("fork failed, aborting operation")
+          create_skeleton(name)  
         end
 
       end
@@ -57,16 +44,32 @@ module Zizu
           next
         else
 
-          html = haml_to_html(f)
+          html      = haml_to_html(f)
+          html_name = dir + f.chomp(".haml") + ".html"
 
-          f = File.open( dir + f.chomp(".haml") + ".html", "w" )
+          f = File.open( html_name, "w" )
           f.write(html)
           f.close
+
+          Zizu::success("created #{html_name}")
 
         end
 
       end
 
+      unless dir.nil?
+
+        FileUtils.cp_r( "scripts", dir )
+        Zizu::success("copying scripts directory")
+
+        FileUtils.cp_r( "styles", dir )
+        Zizu::success("copying styles directory")
+
+        FileUtils.cp_r( "images", dir )
+        Zizu::success("copying images directory")
+
+      end
+ 
     end
 
     desc( "test", "deploy static files locally for testing")
@@ -86,6 +89,29 @@ module Zizu
     end
 
     no_tasks do
+
+      def fork(name)
+
+        g = GithubLib.new    
+
+        # TODO make atomic
+        if g.fork( Zizu::USER, Zizu::REPOSITORY )
+
+          if g.set_repository_name( REPOSITORY, name )
+
+            if Rgit::Lib.clone( @git_url, name )
+              Zizu::success("repository cloned to local")
+            else
+              Zizu::fatal("unable clone remote repository")
+            end
+
+          end
+
+        else
+          Zizu::fatal("fork failed, aborting operation")
+        end
+
+      end
 
       def get_rack
 
@@ -135,14 +161,29 @@ module Zizu
 
       end
 
+      def create_skeleton(name)
+
+        dirs = [ "images", "styles", "scripts", "conf" ]
+
+        dirs.each do |d|
+          create_directory( "#{name}/#{d}")
+        end
+
+        # copy from github or store locally?  if no network?
+        # TODO how about a reverse html to haml?
+
+        
+
+      end
+
       def create_directory(name)
 
         if name.nil?
-          return ""
+          Zizu::fatal("no directory name specified")
         else
 
-          Dir.mkdir(name) unless File.directory?(name)
-          return "#{name}/"
+          FileUtils.mkdir_p(name) unless File.directory?(name)
+          Zizu::success("#{name} directory created")
 
         end
                                                                             
