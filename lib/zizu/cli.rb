@@ -88,7 +88,10 @@ module Zizu
 
       g = GithubLib.new
 
-      response = g.get_files()
+      latest = g.get_latest_commit()
+
+      tree = g.get_tree(latest)
+      g.get_files(tree)
 
     end
 

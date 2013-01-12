@@ -131,39 +131,59 @@ module Zizu
 
     end
 
-    def get_tree
+    def get_tree(id)
 
-      latest = get_latest_commit
+      #latest = get_latest_commit
 
-      response = @api.git_data.trees.get( USER, REPOSITORY,
-        latest )
+      response = @api.git_data.trees.get( USER, REPOSITORY, id )
 
       if response.success?
         return response[:tree]
       else
-        fatal("unable to retrieve tree for #{latest}")
+        fatal("unable to retrieve tree for #{id}")
       end
 
     end
 
-    def get_files
-
-      tree = get_tree
+    def get_files( tree, subdir=nil )
 
       tree.each do |t|
 
-        #f = File.open( t[:path], "w" )
-        data = open(t[:url])
-        puts j
-        #contents = Base64.decode64(data.to_json[:content])
-        #puts contents
-        #f.write(contents)
-        #f.close
+        if t["type"] == "tree"
+
+          if subdir.nil?
+            FileUtils.mkdir_p(t["path"])
+          else
+            FileUtils.mkdir_p( "#{subdir}/#{t["path"]}" )
+          end
+
+          get_files( get_tree(t["sha"]), t["path"] )
+          next
+
+        else
+
+          data = open(t["url"])
+          json = JSON.parse(data.read())
+
+          unless json["content"].nil?
+
+            if subdir.nil?
+              f = File.open( t["path"], "w" )
+            else
+              f = File.open( "#{subdir}/#{t["path"]}", "w" )
+            end
+
+            contents = Base64.decode64(json["content"])
+            f.write(contents)
+            f.close
+
+          end
+
+        end
 
       end
 
     end
-
 
   end
 
