@@ -80,8 +80,8 @@ module Zizu
  
     end
 
-    desc( "test", "deploy static files locally for testing")
-    def test
+    desc( "stage", "stage environment locally for testing")
+    def stage 
 
       get_rack
       get_bootstrap
@@ -90,18 +90,18 @@ module Zizu
 
     end
 
-    desc( "deploy", "deploy static files to production" )
-    method_option :target, :aliases => "-t", :required => false
-    def deploy
+    #desc( "deploy", "deploy static files to production" )
+    #method_option :target, :aliases => "-t", :required => false
+    #def deploy
 
-      g = GithubLib.new
+    #  g = GithubLib.new
 
-      latest = g.get_latest_commit()
+    #  latest = g.get_latest_commit()
 
-      tree = g.get_tree(latest)
-      g.download_files(tree)
+    #  tree = g.get_tree(latest)
+    #  g.download_files(tree)
 
-    end
+    #end
 
     no_tasks do
 
