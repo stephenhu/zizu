@@ -30,7 +30,10 @@ module Zizu
     def compile
 
       excludes  = check_exclusions(options[:exclude])
-      dir       = create_directory(options[:output])
+
+      unless options[:output].nil?
+        dir = create_directory(options[:output])
+      end
 
       basedir = "."
 
@@ -45,7 +48,12 @@ module Zizu
         else
 
           html      = haml_to_html(f)
-          html_name = dir + f.chomp(".haml") + ".html"
+
+          if dir.nil?
+            html_name = f.chomp(".haml") + ".html"
+          else
+            html_name = dir + f.chomp(".haml") + ".html"
+          end
 
           f = File.open( html_name, "w" )
           f.write(html)
