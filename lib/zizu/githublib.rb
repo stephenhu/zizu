@@ -145,19 +145,20 @@ module Zizu
 
     end
 
-    def get_files( tree, subdir=nil )
+    def download_files( tree, dir=nil )
 
       tree.each do |t|
 
         if t["type"] == "tree"
 
-          if subdir.nil?
-            FileUtils.mkdir_p(t["path"])
+          if dir.nil?
+            new_path = t["path"]
           else
-            FileUtils.mkdir_p( "#{subdir}/#{t["path"]}" )
+            new_path = "#{dir}/#{t["path"]}"
           end
 
-          get_files( get_tree(t["sha"]), t["path"] )
+          FileUtils.mkdir_p(new_path)
+          download_files( get_tree(t["sha"]), new_path )
           next
 
         else
@@ -167,10 +168,10 @@ module Zizu
 
           unless json["content"].nil?
 
-            if subdir.nil?
+            if dir.nil?
               f = File.open( t["path"], "w" )
             else
-              f = File.open( "#{subdir}/#{t["path"]}", "w" )
+              f = File.open( "#{dir}/#{t["path"]}", "w" )
             end
 
             contents = Base64.decode64(json["content"])

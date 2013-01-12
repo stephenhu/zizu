@@ -91,7 +91,7 @@ module Zizu
       latest = g.get_latest_commit()
 
       tree = g.get_tree(latest)
-      g.get_files(tree)
+      g.download_files(tree)
 
     end
 
@@ -188,6 +188,13 @@ module Zizu
 
         # copy from github or store locally?  if no network?
         # TODO how about a reverse html to haml?
+
+        g = GithubLib.new
+
+        latest = g.get_latest_commit()
+
+        tree = g.get_tree(latest)
+        g.download_files( tree, name )
 
       end
 
