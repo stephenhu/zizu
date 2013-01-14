@@ -1,16 +1,19 @@
 #!/usr/bin/env ruby
+
+require "colorize"
 require "github_api"
 require "haml"
 require "highline/import"
+require "open3"
 require "open-uri"
 require "rack"
-require "rgit"
 require "thor"
 require "tilt"
 require "yaml"
 require "zip/zip"
 
 require File.join( File.dirname(__FILE__), "zizu", "githublib" )
+require File.join( File.dirname(__FILE__), "zizu", "gitlib" )
 require File.join( File.dirname(__FILE__), "zizu", "version" )
 require File.join( File.dirname(__FILE__), "zizu", "cli" )
 

@@ -95,16 +95,26 @@ module Zizu
         g = GithubLib.new    
 
         # TODO make atomic
-        if g.fork( Zizu::USER, Zizu::REPOSITORY )
+        git_url = g.fork( USER, REPOSITORY )
 
-          if g.set_repository_name( REPOSITORY, name )
+        unless git_url.nil?
 
-            if Rgit::Lib.clone( @git_url, name )
+          new_url = g.set_repository_name( REPOSITORY, name )
+
+          if g.check_exists?(name)
+            # TODO retry if it doesn't exist since this is asynch
+            if Gitlib.clone( new_url, name )
               Zizu::success("repository cloned to local")
             else
+
               Zizu::fatal("unable clone remote repository")
+              g.delete_repository(REPOSITORY)
+
             end
 
+          else
+            Zizu::fatal("repository rename failed, aborting operation")
+            g.delete_repository(REPOSITORY)
           end
 
         else
@@ -124,7 +134,7 @@ module Zizu
 
       def get_bootstrap
 
-        bootstrap = open(Zizu::BOOTSTRAP)
+        bootstrap = open(BOOTSTRAP)
 
         Zip::ZipFile.open(bootstrap.path) do |z|
 
@@ -171,8 +181,6 @@ module Zizu
 
         # copy from github or store locally?  if no network?
         # TODO how about a reverse html to haml?
-
-        
 
       end
 

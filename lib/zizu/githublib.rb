@@ -11,9 +11,9 @@ module Zizu
 
     def login
 
-      config = Rgit::Lib.config
+      config = Gitlib.config
 
-      if Zizu::USER == config["user.name"]
+      if USER == config["user.name"]
         Zizu::fatal("cannot fork a project you own, aborting")
       end
 
@@ -22,9 +22,7 @@ module Zizu
         @login     = ENV["ZIZU_GIT_LOGIN"] || config["user.email"]
         @password  = ENV["ZIZU_GIT_PASSWORD"] ||
           ask("git password: ") { |q| q.echo = "*" }
-        puts @login
-        puts @password
-                                                                     
+
         if @login.nil? or @password.nil?
           Zizu::fatal("please set git config variable user.name")
         end
@@ -47,12 +45,12 @@ module Zizu
 
         if response.success?
           Zizu::success("repository forked to: #{response[:git_url]}")
-          return true
+          return response[:git_url]
         end
 
       end
 
-      return false
+      return nil 
 
     end
 
@@ -84,20 +82,42 @@ module Zizu
 
     end
 
+    def check_exists?(repo)
+
+      response = @api.repos.get( @login, repo )
+
+      if response.success?
+        return true
+      else
+        return false
+      end
+
+    end
+
     def set_repository_name( repository, new_name )
 
       response = @api.repos.edit( @login, repository, :name => new_name )
 
       if response.success?
-        Zizu::success("Repository successfully renamed to #{name}")
+        Zizu::success("Repository successfully renamed to #{new_name}")
         Zizu::success(response[:git_url])
-        return true
+        return response[:git_url] 
       else
         Zizu::fatal("GithubLib Error: #{response.status}")
+        return nil
       end
 
     end
- 
+
+    def delete_repository(name)
+
+      puts @login
+      puts "rollback"
+
+      #response = @api.repos.delete( @login, name )
+
+    end
+
   end
 
 end
