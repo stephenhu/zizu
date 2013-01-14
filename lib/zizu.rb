@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require "base64"
 require "colorize"
 require "github_api"
 require "haml"

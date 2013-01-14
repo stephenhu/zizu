@@ -83,8 +83,12 @@ module Zizu
     end
 
     desc( "deploy", "deploy static files to production" )
-    method_option :target, :aliases => "-t"
+    method_option :target, :aliases => "-t", :required => false
     def deploy
+
+      g = GithubLib.new
+
+      response = g.get_files()
 
     end
 

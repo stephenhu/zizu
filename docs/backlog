@@ -1,7 +1,6 @@
 - add rspec tests
 - prompt user on overwriting existing files
 - add in configuration file to ~/.zizu
-- development in thin and sinatra
-- staging for development, i.e. pull bootstrap
--
+- download prettify
+- download jqueryui
 

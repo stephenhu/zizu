@@ -11,20 +11,21 @@ module Zizu
 
     def login
 
-      config = Gitlib.config
-
-      if USER == config["user.name"]
-        Zizu::fatal("cannot fork a project you own, aborting")
-      end
-
       if @api.nil?                                                           
  
-        @login     = ENV["ZIZU_GIT_LOGIN"] || config["user.email"]
+        config = Gitlib.config
+
+        @login     = ENV["ZIZU_GIT_LOGIN"] || config["user.name"]
+
+        if @login == USER
+          Zizu::fatal("cannot fork a project that you own, aborting")
+        end
+
         @password  = ENV["ZIZU_GIT_PASSWORD"] ||
           ask("git password: ") { |q| q.echo = "*" }
 
         if @login.nil? or @password.nil?
-          Zizu::fatal("please set git config variable user.name")
+          Zizu::fatal("please set git config variable user.name or env variable ZIZU_GIT_LOGIN.")
         end
 
         @api = Github.new( login:@login, password:@password )
@@ -117,6 +118,52 @@ module Zizu
       #response = @api.repos.delete( @login, name )
 
     end
+
+    def get_latest_commit
+
+      response = @api.repos.commits.list( USER, REPOSITORY )
+
+      if response.success?
+        return response[0][:sha]
+      else
+        fatal("unable to retrieve latest commit hash")
+      end
+
+    end
+
+    def get_tree
+
+      latest = get_latest_commit
+
+      response = @api.git_data.trees.get( USER, REPOSITORY,
+        latest )
+
+      if response.success?
+        return response[:tree]
+      else
+        fatal("unable to retrieve tree for #{latest}")
+      end
+
+    end
+
+    def get_files
+
+      tree = get_tree
+
+      tree.each do |t|
+
+        #f = File.open( t[:path], "w" )
+        data = open(t[:url])
+        puts j
+        #contents = Base64.decode64(data.to_json[:content])
+        #puts contents
+        #f.write(contents)
+        #f.close
+
+      end
+
+    end
+
 
   end
 
